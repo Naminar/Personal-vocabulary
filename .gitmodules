@@ -1,0 +1,3 @@
+[submodule "CambridgeDict"]
+	path = CambridgeDict
+	url = https://github.com/Blackdeer1524/CambridgeDict.py.git
