@@ -93,11 +93,12 @@ def add_word(doc, word, expl, defin, text_exmpl, dict_exmpl):
 def generate_doc():
     doc = Document()
     doc.add_heading('Personal Vocabular, MIPT 2024')
-    doc.add_heading("a. Definition from an Eng-Eng dictionary (Macmillan / Cambridge / Collins / etc / or field-specific dictionary).\n"
+    param = doc.add_heading("a. Definition from an Eng-Eng dictionary (Macmillan / Cambridge / Collins / etc / or field-specific dictionary).\n"
                     "b. Sentence of usage from the article\n"
                     "c. Sentence of usage from the dictionary\n"  
                     "d. Your own example sentence\n", 2
                     )
+    param.italic=True
     # doc.add_paragraph("It was a dark and stormy night.")
     # doc.add_paragraph()
     # <docx.text.paragraph.Paragraph object at 0x10f19e760>
@@ -169,7 +170,11 @@ def mess_ass(sentences=None, doc=None):
     #     print(definitions)
     #     print(examples)
     part, definitions, examples, num = None, None, None, 0
-    pprint(res)
+    
+    # if didn't find in cambridge dictionary
+    if not res:
+        return True
+    
     cambridge_name = list(res[0].keys())[0]
     # print(cambridge_name[0])
     if len(res[0][cambridge_name]) > 1:
