@@ -7,7 +7,7 @@ Run Makefile to install submodule to use it
 $ make
 ```
 
-Before use check and install modules below:
+Check and install modules below:
 ```console
 $ pip install python-docx
 $ pip install pypdf

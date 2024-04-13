@@ -160,7 +160,7 @@ def mess_ass(sentences=None, doc=None):
     if pdf_sent is None:
         print(colored('Cannot find this word in pdf sentences :))). Use your fingers to find!', 'red'))
 
-    res = define(word=word)
+    res = define(word=word, dictionary_type="english")
     # pprint(res) 
     # for key in res[0][word]:
     #     definitions = key['data']['definitions'] 
@@ -169,6 +169,7 @@ def mess_ass(sentences=None, doc=None):
     #     print(definitions)
     #     print(examples)
     part, definitions, examples, num = None, None, None, 0
+    pprint(res)
     cambridge_name = list(res[0].keys())[0]
     # print(cambridge_name[0])
     if len(res[0][cambridge_name]) > 1:
