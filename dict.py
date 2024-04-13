@@ -13,13 +13,20 @@ from CambridgeDict.cambridge_parser import define
 
 def extract_pdf(pdf: str):
     reader = PdfReader(pdf+'.pdf') 
-    print(len(reader.pages))  
+    # print(len(reader.pages))  
     page = reader.pages[1]
     text = ''
     
     for page in reader.pages:
         text += page.extract_text()
     return text 
+
+def print_help():
+    print(colored('Shortcuts:', 'red'))
+    print(colored('\t help(), h() - run to show this message everywhere.\n'
+                '\t exit(), e() - stop to add words into DOC file and exit.\n'
+                '\t back(), b() - go back from words to select letter.\n',\
+                'light_blue'))
 
 def del_dupl(x):
     return list(dict.fromkeys(x))
@@ -97,20 +104,23 @@ def generate_doc():
     # doc.save("Personal Vocabular.docx")
     return doc
 
-SPEC = {'e':['exit()', 'e()'], 'b':['back()', 'b()']}
+SPEC = {'e':['exit()', 'e()'], 'b':['back()', 'b()'], 'h':['help()', 'h()']}
 
 # message assistant
 def mess_ass(sentences=None, doc=None):
     assert(sentences)
 
-    print(colored('Input the letter to show possible words:', 'green'))
+    print(colored('Input the letter to show possible words: ', 'green'), end='')
     while(True):
         letter = input().lower()
         if letter in SPEC['e']:
             return False
+        elif letter in SPEC['h']:
+            print_help()
+            continue
         
         if len(letter) == 1 and ord(letter) - ord('a') < 26 and ord(letter) - ord('a') >= 0:  
-            print(ord(letter) - ord('a'))
+            # print(ord(letter) - ord('a'))
             pprint(alphabet[ord(letter) - ord('a')])
             break
         else:
@@ -118,12 +128,16 @@ def mess_ass(sentences=None, doc=None):
     
     pdf_sent = None
     word = None
-    print(colored('Input the word to create its definition:', 'green'))
+    print(colored('Input the word to create its definition: ', 'green'), end='')
     while(True):
         word = input().lower()
         
         if word in SPEC['b']:
             return True
+        elif word in SPEC['h']:
+            print_help()
+            continue
+
         if word not in alphabet[ord(word[0]) - ord('a')]:
             print('Incorrect word.')
             continue
@@ -147,7 +161,7 @@ def mess_ass(sentences=None, doc=None):
         print(colored('Cannot find this word in pdf sentences :))). Use your fingers to find!', 'red'))
 
     res = define(word=word)
-    pprint(res) 
+    # pprint(res) 
     # for key in res[0][word]:
     #     definitions = key['data']['definitions'] 
     #     examples = key['data']['examples']
@@ -182,39 +196,41 @@ if __name__ == '__main__':
 
     print(colored('Hello! Please, inter the pdf file name', 'green'), end='')
     print(colored('(without .pdf)', 'red'), end='')
-    print(colored(':', 'green'))
+    print(colored(': ', 'green'), end='')
 
-    pdf_file = input()
-    try: 
-        pdf_text = extract_pdf(pdf_file) #('Thermal limits')
-    except:
-        print(colored('Invalid file (check name of file or its path)', 'red'))
-    else:
+    pdf_file = None
+    while True:
+        pdf_file = input()
+        if os.path.isfile(os.path.dirname(__file__) + '/'+ pdf_file + '.pdf'):
+            break
+        else:
+            print(colored('Invalid file (check name of file or its path)', 'red'))
+            if '.pdf' in pdf_file:
+                print(colored('WITHOUT .PDF!!!', 'cyan'))
+    
+    pdf_text = extract_pdf(pdf_file) #('Thermal limits')
+    
     # if hasattr(pdf_text):
-        text  = copy.copy(pdf_text)
-        sentences = [key.replace("\n", "") for key in\
-                                [x for x in re.split("[//.|//!|//?]", text) if x!=""]]
+    text  = copy.copy(pdf_text)
+    sentences = [key.replace("\n", "") for key in\
+                            [x for x in re.split("[//.|//!|//?]", text) if x!=""]]
 
-        words = create_dict(pdf_text)
-            # print(len(words))
-            # pprint(words)
-        alphabet = create_alph(words)
-        doc = generate_doc()
+    words = create_dict(pdf_text)
+        # print(len(words))
+        # pprint(words)
+    alphabet = create_alph(words)
+    doc = generate_doc()
 
-        print(colored('Shortcuts:', 'red'))
-        print(colored('\t exit(), e() - stop to add words into DOC file and exit.\n'
-                    '\t back(), b() - go back from words to select letter.\n',\
-                    'light_blue'))
-        while(mess_ass(sentences, doc)): continue
-        
-        doc.save('vocabulary.docx')
+    while(mess_ass(sentences, doc)): continue
+    
+    doc.save('vocabulary.docx')
 
-        # pprint(alphabet)
+    # pprint(alphabet)
 
-        # res = define(word=word)
-        # pprint(res)
-    # doc_name = ' '
-    # generate_doc(doc_name=doc_name)
+    # res = define(word=word)
+    # pprint(res)
+# doc_name = ' '
+# generate_doc(doc_name=doc_name)
 
 
 
