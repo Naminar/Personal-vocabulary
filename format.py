@@ -3,9 +3,12 @@ import os
 sys.path.append(os.path.dirname(__file__) + '/CambridgeDict/cambridge_parser')
 from CambridgeDict.cambridge_parser import define
 from pprint import pprint
-from termcolor import colored
-# import argparse
 from colored import Fore, Back, Style
+from pypdf import PdfReader
+import re
+from termcolor import colored
+from docx import Document
+import copy
 
 # parser = argparse.ArgumentParser(description='Videos to images')
 # parser.add_argument('indir', type=str, help='Input dir for videos')
@@ -29,15 +32,15 @@ def format(word):
         return True
     
     res_key = list(res[0].keys())
-    print(res_key)
+    # print(res_key)
     ### possible to add key
     for key in res_key:
-        print('key is ', key)
+        # print('key is ', key)
         if len(key) > len(word):
             continue
         cout = ''
-        cout += key+'\n'
-        pprint(res)
+        cout += colored(key, 'light_magenta')+'\n'
+        # pprint(res)
         for ind in res[0][key]:
             if not ind['POS'] or not ind['data'][SET[0]]: 
                 res[0].pop(key) # !!!
