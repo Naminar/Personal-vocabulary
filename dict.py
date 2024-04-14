@@ -90,11 +90,9 @@ def add_word(doc, text_exmpl, format_arg):
     word, part, defin, dict_exmpl = format_arg
     doc.add_paragraph(word + f' [{part}]', style=L)
     doc.add_paragraph(' - ' + defin, style=LL)
-    try:
-        doc.add_paragraph(f'"{text_exmpl}"', style=LL)
-    except:
-        text_exmpl = ''.join(c for c in text_exmpl if valid_xml_char_ordinal(c))
-        doc.add_paragraph(f'"{text_exmpl}"', style=LL)
+
+    text_exmpl = ''.join(c for c in text_exmpl if valid_xml_char_ordinal(c))
+    doc.add_paragraph(f'"{text_exmpl}"', style=LL)
 
     doc.add_paragraph(f'"{dict_exmpl}"', style=LL)
     doc.add_paragraph(f'" "', style=LL)
