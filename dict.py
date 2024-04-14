@@ -231,7 +231,7 @@ def mess_ass(sentences=None, doc=None):
             format_args = user_set
             break
         else:
-            print(f'{Fore.red} Incorrect format of definition set!\n{Fore.blue}Example: {Fore.green}[verb:a:1]')
+            print(f'{Fore.red} Incorrect format of definition set!\n{Fore.green}[(a part of speech):(def index):(example index)]\n{Fore.blue}Example: {Fore.green}[verb:a:1]')
 
     word_args = format_arg(res, format_args)
     # print(word_args)
