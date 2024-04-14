@@ -1,15 +1,6 @@
-import sys
-import os
-from pprint import pprint
-from pypdf import PdfReader
-import re
-from termcolor import colored
-# import aspose.words as aw
-from docx import Document
-import copy
-
-sys.path.append(os.path.dirname(__file__) + '/CambridgeDict/cambridge_parser')
-from CambridgeDict.cambridge_parser import define
+from format import *
+# sys.path.append(os.path.dirname(__file__) + '/CambridgeDict/cambridge_parser')
+# from CambridgeDict.cambridge_parser import define
 
 def extract_pdf(pdf: str):
     reader = PdfReader(pdf+'.pdf') 
@@ -24,8 +15,9 @@ def extract_pdf(pdf: str):
 def print_help():
     print(colored('Shortcuts:', 'red'))
     print(colored('\t help(), h() - run to show this message everywhere.\n'
-                '\t exit(), e() - stop to add words into DOC file and exit.\n'
-                '\t back(), b() - go back from words to select letter.\n',\
+                '\t exit(), e() - stop to add words into DOCX file and exit.\n'
+                '\t back(), b() - go back from words to select letter.\n'
+                '\t count(), c() - show the number of defined words in DOCX.',\
                 'light_blue'))
 
 def del_dupl(x):
@@ -81,13 +73,32 @@ def create_dict(text):
 L = "List Bullet"
 LL = "List Bullet 2"
 LL = "List Bullet 3"
+WORD_COUNT = 0
 
-def add_word(doc, word, expl, defin, text_exmpl, dict_exmpl):
-    doc.add_paragraph(word + f' [{expl}]', style=L)
+def valid_xml_char_ordinal(c):
+    codepoint = ord(c)
+    # conditions ordered by presumed frequency
+    return (
+        0x20 <= codepoint <= 0xD7FF or
+        codepoint in (0x9, 0xA, 0xD) or
+        0xE000 <= codepoint <= 0xFFFD or
+        0x10000 <= codepoint <= 0x10FFFF
+        )
+
+def add_word(doc, text_exmpl, format_arg):
+    global WORD_COUNT
+    word, part, defin, dict_exmpl = format_arg
+    doc.add_paragraph(word + f' [{part}]', style=L)
     doc.add_paragraph(' - ' + defin, style=LL)
-    doc.add_paragraph(f'"{text_exmpl}"', style=LL)
+    try:
+        doc.add_paragraph(f'"{text_exmpl}"', style=LL)
+    except:
+        text_exmpl = ''.join(c for c in text_exmpl if valid_xml_char_ordinal(c))
+        doc.add_paragraph(f'"{text_exmpl}"', style=LL)
+
     doc.add_paragraph(f'"{dict_exmpl}"', style=LL)
     doc.add_paragraph(f'" "', style=LL)
+    WORD_COUNT += 1 
     return
 
 def generate_doc():
@@ -105,7 +116,7 @@ def generate_doc():
     # doc.save("Personal Vocabular.docx")
     return doc
 
-SPEC = {'e':['exit()', 'e()'], 'b':['back()', 'b()'], 'h':['help()', 'h()']}
+SPEC = {'e':['exit()', 'e()'], 'b':['back()', 'b()'], 'h':['help()', 'h()'], 'c':['count()', 'c()']}
 
 # message assistant
 def mess_ass(sentences=None, doc=None):
@@ -118,6 +129,9 @@ def mess_ass(sentences=None, doc=None):
             return False
         elif letter in SPEC['h']:
             print_help()
+            continue
+        elif letter in SPEC['c']:
+            print(WORD_COUNT)
             continue
         
         if len(letter) == 1 and ord(letter) - ord('a') < 26 and ord(letter) - ord('a') >= 0:  
@@ -137,6 +151,9 @@ def mess_ass(sentences=None, doc=None):
             return True
         elif word in SPEC['h']:
             print_help()
+            continue
+        elif word in SPEC['c']:
+            print(WORD_COUNT)
             continue
 
         if word not in alphabet[ord(word[0]) - ord('a')]:
@@ -161,41 +178,64 @@ def mess_ass(sentences=None, doc=None):
     if pdf_sent is None:
         print(colored('Cannot find this word in pdf sentences :))). Use your fingers to find!', 'red'))
 
-    res = define(word=word, dictionary_type="english")
-    # pprint(res) 
-    # for key in res[0][word]:
-    #     definitions = key['data']['definitions'] 
-    #     examples = key['data']['examples']
-    #     print(key['POS'][0])
-    #     print(definitions)
-    #     print(examples)
-    part, definitions, examples, num = None, None, None, 0
+    # res = define(word=word, dictionary_type="english")
+    # # pprint(res) 
+    # # for key in res[0][word]:
+    # #     definitions = key['data']['definitions'] 
+    # #     examples = key['data']['examples']
+    # #     print(key['POS'][0])
+    # #     print(definitions)
+    # #     print(examples)
+    # part, definitions, examples, num = None, None, None, 0
     
-    # if didn't find in cambridge dictionary
-    if not res:
-        return True
+    # # if didn't find in cambridge dictionary
+    # if not res:
+    #     return True
     
-    cambridge_name = list(res[0].keys())[0]
-    # print(cambridge_name[0])
-    if len(res[0][cambridge_name]) > 1:
-        print(colored('Choose the part, input example number from 1 to {}'.format(len(res[0][cambridge_name])), 'red'))
-        pprint([key['POS'][0] for key in res[0][cambridge_name]])
+    # cambridge_name = list(res[0].keys())[0]
+    # # print(cambridge_name[0])
+    # if len(res[0][cambridge_name]) > 1:
+    #     print(colored('Choose the part, input example number from 1 to {}'.format(len(res[0][cambridge_name])), 'red'))
+    #     pprint([key['POS'][0] for key in res[0][cambridge_name]])
         
-        num = int(input())-1
+    #     num = int(input())-1
 
-    part = res[0][cambridge_name][num]['POS'][0]
-    definitions = res[0][cambridge_name][num]['data']['definitions'] 
-    examples = res[0][cambridge_name][num]['data']['examples']
+    # part = res[0][cambridge_name][num]['POS'][0]
+    # definitions = res[0][cambridge_name][num]['data']['definitions'] 
+    # examples = res[0][cambridge_name][num]['data']['examples']
         
 
-    if not examples[0]:
-        examples = None
-    else:
-        print(colored('Input example number from 1 to {}'.format(len(examples[0])), 'red'))
-        pprint(examples[0])
-        examples = examples[0][int(input())-1]
+    # if not examples[0]:
+    #     examples = None
+    # else:
+    #     print(colored('Input example number from 1 to {}'.format(len(examples[0])), 'red'))
+    #     pprint(examples[0])
+    #     examples = examples[0][int(input())-1]
 
-    add_word(doc, word, part, definitions[0], pdf_sent, examples)# key['POS'][0], key['data']['definitions'], key['data']['examples'][0])
+    res = format(word)
+    format_args, format_string = None, None
+    while(True):
+        format_string = input(f"{Fore.green}Your choose is: {Style.reset}")
+        user_set = format_string.split(':')
+        brk = False
+        for el in user_set:
+            if not el: brk = True; break
+        if brk: continue
+
+        if len(user_set) == 3:
+            # print(3, user_set)
+            format_args = [word] + user_set
+            break
+        elif len(user_set) == 4:
+            # print(4, user_set)
+            format_args = user_set
+            break
+        else:
+            print(f'{Fore.red} Incorrect format of definition set!\n{Fore.blue}Example: {Fore.green}[verb:a:1]')
+
+    word_args = format_arg(res, format_args)
+    # print(word_args)
+    add_word(doc, pdf_sent, word_args)# key['POS'][0], key['data']['definitions'], key['data']['examples'][0])
     return True
 
 if __name__ == '__main__':
